@@ -1,7 +1,9 @@
 GOCMD=go build -v
 
+all: ondisk
+
 ondisk:
-	$(GOCMD) -o ondisk github.com/MarwanRadwan7/k
+	$(GOCMD) -o ondisk github.com/lni/dragonboat-example/v3/ondisk
 
 clean:
 	@rm -f ondisk

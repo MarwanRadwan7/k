@@ -1,3 +1,20 @@
+// Copyright 2017,2018 Lei Ni (nilei81@gmail.com).
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+/*
+ondisk is an example program for dragonboat's on disk state machine.
+*/
 package main
 
 import (
@@ -24,13 +41,12 @@ const (
 )
 
 const (
-	// The on-disk KV supports two types of requests
 	PUT RequestType = iota
 	GET
 )
 
 var (
-	// Initial nodes count is fixed to three, their addresses are also fixed
+	// initial nodes count is fixed to three, their addresses are also fixed
 	addresses = []string{
 		"localhost:63001",
 		"localhost:63002",
@@ -63,7 +79,6 @@ func printUsage() {
 }
 
 func main() {
-	// Initialize the CLI flags
 	nodeID := flag.Int("nodeid", 1, "NodeID to use")
 	addr := flag.String("addr", "", "Nodehost address")
 	join := flag.Bool("join", false, "Joining a new node")
@@ -72,7 +87,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "node id must be 1, 2 or 3 when address is not specified\n")
 		os.Exit(1)
 	}
-	
+
 	initialMembers := make(map[uint64]string)
 	if !*join {
 		for idx, v := range addresses {
@@ -85,7 +100,6 @@ func main() {
 	} else {
 		nodeAddr = initialMembers[uint64(*nodeID)]
 	}
-
 	fmt.Fprintf(os.Stdout, "node address: %s\n", nodeAddr)
 	logger.GetLogger("raft").SetLevel(logger.ERROR)
 	logger.GetLogger("rsm").SetLevel(logger.WARNING)
@@ -94,27 +108,28 @@ func main() {
 
 	// config the raft nodes
 	rc := config.Config{
-		NodeID:             uint64(*nodeID),
-		ClusterID:          exampleClusterID,
-		ElectionRTT:        10,
-		HeartbeatRTT:       1,
-		CheckQuorum:        true,
-		SnapshotEntries:    10,
-		CompactionOverhead: 5,
+		NodeID:                  uint64(*nodeID),
+		ClusterID:               exampleClusterID,
+		ElectionRTT:             10,
+		HeartbeatRTT:            1,
+		CheckQuorum:             true,
+		SnapshotEntries:         10,
+		CompactionOverhead:      5,
+		SnapshotCompressionType: config.Snappy,
 	}
 
-	// specify the directory of the meta-data
-	dataDir := filepath.Join(
+	// specify the directory of the meta-data.
+	datadir := filepath.Join(
 		"metadata",
 		fmt.Sprintf("node%d", *nodeID))
-
-	// configure NodeHost instances.
 	nhc := config.NodeHostConfig{
-		WALDir:         dataDir,
-		NodeHostDir:    dataDir,
+		WALDir:         datadir,
+		NodeHostDir:    datadir,
 		RTTMillisecond: 200,
 		RaftAddress:    nodeAddr,
 	}
+
+	// configure NodeHost instances.
 	nh, err := dragonboat.NewNodeHost(nhc)
 	if err != nil {
 		panic(err)
@@ -144,8 +159,8 @@ func main() {
 		}
 	})
 	printUsage()
-	
-	// handle the error messages and stop the raft cluster
+
+	// handle the error messages and stop the raft cluster.
 	raftStopper.RunWorker(func() {
 		cs := nh.GetNoOPSession(exampleClusterID)
 		for {

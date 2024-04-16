@@ -4,10 +4,12 @@ This is an example/demo on how to use dragonboat package to setup an on disk sta
 
 ## Build
 
-To build the executable:
+To build the executable -
 
 ```
 make ondisk
+cd ondisk
+./ondisk
 ```
 
 ## Run This Example

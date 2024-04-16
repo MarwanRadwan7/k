@@ -25,13 +25,13 @@ import (
 
 const (
 	appliedIndexKey    string = "disk_kv_applied_index"
-	testDBDirName      string = "metadata"
+	testDBDirName      string = "example-data"
 	currentDBFilename  string = "current"
 	updatingDBFilename string = "current.updating"
 )
 
-// syncDir function synchronizes the contents of a directory with the underlying storage device, 
-// ensuring that all data written to the directory and its subdirectories is flushed to the storage device. 
+// syncDir function synchronizes the contents of a directory with the underlying storage device,
+// ensuring that all data written to the directory and its subdirectories is flushed to the storage device.
 func syncDir(dir string) (err error) {
 	if runtime.GOOS == "windows" {
 		return nil
@@ -60,7 +60,7 @@ type KVData struct {
 	Val string
 }
 
-// pebbledb is a wrapper to ensure lookup() and close() can be concurrently invoked. 
+// pebbledb is a wrapper to ensure lookup() and close() can be concurrently invoked.
 // IOnDiskStateMachine.Update() and close() will never be concurrently invoked.
 type pebbledb struct {
 	mu     sync.RWMutex
@@ -162,7 +162,7 @@ func replaceCurrentDBFile(dir string) error {
 	return syncDir(dir)
 }
 
-// saveCurrentDBDirName creates a new database directory file 
+// saveCurrentDBDirName creates a new database directory file
 // with a hash of the given `dbdir` string and saves it to the `dir` directory.
 func saveCurrentDBDirName(dir string, dbdir string) error {
 	h := md5.New()
@@ -262,8 +262,8 @@ func cleanupNodeDataDir(dir string) error {
 }
 
 // DiskKV is a state machine that implements the IOnDiskStateMachine interface.
-// DiskKV stores key-value pairs in the underlying PebbleDB key-value store. 
-// As it is used as an example, it is implemented using the most basic features
+// DiskKV stores key-value pairs in the underlying PebbleDB key-value store. As
+// it is used as an example, it is implemented using the most basic features
 // common in most key-value stores. This is NOT a benchmark program.
 type DiskKV struct {
 	clusterID   uint64
@@ -436,12 +436,8 @@ func iteratorIsValid(iter *pebble.Iterator) bool {
 // As an example, we use the most straight forward way to implement this.
 func (d *DiskKV) saveToWriter(db *pebbledb,
 	ss *pebble.Snapshot, w io.Writer) error {
-	iter,err := ss.NewIter(db.ro)
-	if err != nil{
-		return err
-	}
+	iter := ss.NewIter(db.ro)
 	defer iter.Close()
-
 	values := make([]*KVData, 0)
 	for iter.First(); iteratorIsValid(iter); iter.Next() {
 		kv := &KVData{
