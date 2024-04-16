@@ -120,7 +120,8 @@ func main() {
 
 	// specify the directory of the meta-data.
 	datadir := filepath.Join(
-		"metadata",
+		"example-data",
+		"helloworld-data",
 		fmt.Sprintf("node%d", *nodeID))
 	nhc := config.NodeHostConfig{
 		WALDir:         datadir,
